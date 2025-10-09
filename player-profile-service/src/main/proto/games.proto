@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package com.example;
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc";
+
+message GameResponse {
+  int64 id = 1;
+  string title = 2;
+  string genre = 3;
+  string developer = 4;
+}
+
+message GetGameRequest {
+  int64 id = 1;
+}
+
+message GetAllGamesRequest {}
+
+message GetAllGamesResponse {
+  repeated GameResponse games = 1;
+}
+
+service GameCatalog {
+  rpc getGameById(GetGameRequest) returns (GameResponse) {}
+  rpc getAllGames(GetAllGamesRequest) returns (GetAllGamesResponse) {}
+}
