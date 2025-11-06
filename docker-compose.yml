@@ -1,0 +1,41 @@
+version: '3.7'
+services:
+  # 1. База даних для Keycloak
+  keycloak-db:
+    image: postgres:14
+    container_name: keycloak_postgres_db
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak
+    ports:
+      - "5433:5432" # Використовуємо 5433, щоб не конфліктувати з іншими БД
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+
+  # 2. Сервер Keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.6
+    container_name: keycloak_server
+    command: start-dev --import-realm
+    environment:
+      # Підключення до БД
+      - KC_DB=postgres
+      - KC_DB_URL_HOST=keycloak-db
+      - KC_DB_URL_DATABASE=keycloak
+      - KC_DB_USERNAME=keycloak
+      - KC_DB_PASSWORD=keycloak
+      - KC_HEALTH_ENABLED=true
+      # Адміністратор Keycloak
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    ports:
+      - "7777:8080" # Ми запускаємо Keycloak на порту 7777
+    volumes:
+      # Імпорт нашого realm-файлу при старті
+      - ./game-realm.json:/opt/keycloak/data/import/game-realm.json:Z
+    depends_on:
+      - keycloak-db
+
+volumes:
+  keycloak-db-data:

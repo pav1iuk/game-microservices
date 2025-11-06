@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Games Dashboard</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        h1, h2 { color: #333; }
+        table { border-collapse: collapse; width: 400px; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background-color: #f4f4f4; }
+        a { float: right; }
+    </style>
+</head>
+<body>
+<a href="/logout">Вийти</a>
+<h1>Вітаємо, {username}!</h1>
+
+<h2>Ваша бібліотека ігор</h2>
+
+{#if games.size > 0}
+    <table>
+        <thead>
+        <tr>
+            <th>Назва гри</th>
+            <th>Жанр</th>
+        </tr>
+        </thead>
+        <tbody>
+        {#for game in games}
+            <tr>
+                <td>{game.title}</td>
+                <td>{game.genre}</td>
+            </tr>
+        {/for}
+        </tbody>
+    </table>
+{#else}
+    <p>У вашій бібліотеці ще немає ігор.</p>
+{/if}
+
+</body>
+</html>

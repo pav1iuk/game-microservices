@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.example.clients.Review;
 import com.example.clients.ReviewServiceClient;
+import jakarta.ws.rs.core.SecurityContext;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import jakarta.ws.rs.core.Response;
 
@@ -20,7 +21,6 @@ public class PlayerResource {
 
     @Inject
     PlayerRepository playerRepository;
-
     @GrpcClient("catalog")
     GameCatalog gameCatalog;
 
@@ -43,13 +43,16 @@ public class PlayerResource {
                 })
                 .collect(Collectors.toList());
     }
-
+    @Inject
+    SecurityContext securityContext;
     @POST
     @Path("/{username}/games/{gameId}/reviews")
     public Review addPlayerReview(@PathParam("username") String username,
                                   @PathParam("gameId") Long gameId,
                                   ReviewInput reviewInput) {
-
+        if (!securityContext.getUserPrincipal().getName().equals(username)) {
+            throw new ForbiddenException("Ви не можете додавати відгуки від імені іншого користувача");
+        }
         Player player = playerRepository.findByUsername(username);
         if (player == null) {
             throw new NotFoundException("Player not found: " + username);
