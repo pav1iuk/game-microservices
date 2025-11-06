@@ -28,7 +28,7 @@ public class GameCatalogGrpcService implements GameCatalog {
     @Override
     public Uni<GetAllGamesResponse> getAllGames(GetAllGamesRequest request) {
         List<GameResponse> gameResponses = repository.findAll().stream()
-                .map(game -> GameResponse.newBuilder() /* ... mapping ... */ .build())
+                .map(game -> GameResponse.newBuilder() .build())
                 .collect(Collectors.toList());
 
         return Uni.createFrom().item(GetAllGamesResponse.newBuilder()

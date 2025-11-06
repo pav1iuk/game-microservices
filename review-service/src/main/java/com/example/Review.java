@@ -5,17 +5,17 @@ public class Review {
     public Long gameId;
     public String username;
     public int rating;
-    public String reviewText;
+    public String text;
 
     public Review() {
     }
 
-    public Review(Long id, Long gameId, String username, int rating, String reviewText) {
+    public Review(Long id, Long gameId, String username, int rating, String text) {
         this.id = id;
         this.gameId = gameId;
         this.username = username;
         this.rating = rating;
-        this.reviewText = reviewText;
+        this.text = text;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class Review {
                 ", gameId=" + gameId +
                 ", username='" + username + '\'' +
                 ", rating=" + rating +
-                ", reviewText='" + reviewText + '\'' +
+                ", text='" + text + '\'' +
                 '}';
     }
 }

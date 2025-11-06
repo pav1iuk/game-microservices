@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @ApplicationScoped
 public class ReviewRepository {
@@ -23,8 +24,14 @@ public class ReviewRepository {
 
     public List<Review> findByGameId(Long gameId) {
         return reviews.stream()
-                .filter(review -> review.gameId.equals(gameId))
+                .filter(review -> review.gameId != null && review.gameId.equals(gameId))
                 .collect(Collectors.toList());
+    }
+    public Optional<Review> findByGameIdAndUsername(Long gameId, String username) {
+        return reviews.stream()
+                .filter(review -> review.gameId != null && review.gameId.equals(gameId) &&
+                        review.username != null && review.username.equals(username))
+                .findFirst();
     }
 
     public Review save(Review review) {
