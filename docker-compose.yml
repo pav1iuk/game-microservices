@@ -44,6 +44,18 @@ services:
       - "5440:5432"
     volumes:
       - games-db-data:/var/lib/postgresql/data
+  players-db:
+    image: postgres:14
+    container_name: players_postgres_db
+    environment:
+      - POSTGRES_USER=quarkus
+      - POSTGRES_PASSWORD=quarkus
+      - POSTGRES_DB=playersdb
+    ports:
+      - "5441:5432"  # Увага: Зовнішній порт 5441
+    volumes:
+      - players-db-data:/var/lib/postgresql/data
 volumes:
   keycloak-db-data:
   games-db-data:
+  players-db-data:

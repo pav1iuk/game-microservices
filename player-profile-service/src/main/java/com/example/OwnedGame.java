@@ -1,13 +1,26 @@
 package com.example;
 
-public class OwnedGame {
-    public Long id;
-    public Long playerId;
-    public Long gameId;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
-    public OwnedGame(Long id, Long playerId, Long gameId) {
-        this.id = id;
-        this.playerId = playerId;
+@Entity
+public class OwnedGame {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
+
+    public Long gameId; // ID гри з каталогу
+
+    @ManyToOne
+    @JoinColumn(name = "player_id")
+    @JsonIgnore // Щоб уникнути циклічності при серіалізації в JSON
+    public Player player;
+
+    public OwnedGame() {}
+
+    public OwnedGame(Long gameId, Player player) {
         this.gameId = gameId;
+        this.player = player;
     }
 }
