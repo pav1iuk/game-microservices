@@ -1,7 +1,11 @@
 package com.example;
 
-public class Review {
-    public Long id;
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.Entity;
+
+@Entity
+public class Review extends PanacheEntity {
+
     public Long gameId;
     public String username;
     public int rating;
@@ -10,22 +14,10 @@ public class Review {
     public Review() {
     }
 
-    public Review(Long id, Long gameId, String username, int rating, String text) {
-        this.id = id;
+    public Review(Long gameId, String username, int rating, String text) {
         this.gameId = gameId;
         this.username = username;
         this.rating = rating;
         this.text = text;
-    }
-
-    @Override
-    public String toString() {
-        return "Review{" +
-                "id=" + id +
-                ", gameId=" + gameId +
-                ", username='" + username + '\'' +
-                ", rating=" + rating +
-                ", text='" + text + '\'' +
-                '}';
     }
 }
