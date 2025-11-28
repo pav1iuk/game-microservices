@@ -6,7 +6,7 @@
     <style>
         body { font-family: sans-serif; margin: 2em; }
         h1, h2 { color: #333; }
-        table { border-collapse: collapse; width: 400px; }
+        table { border-collapse: collapse; width: 600px; } /* Трохи розширив таблицю для форми */
         th, td { border: 1px solid #ccc; padding: 8px; }
         th { background-color: #f4f4f4; }
         a { float: right; }
@@ -24,6 +24,7 @@
         <tr>
             <th>Назва гри</th>
             <th>Жанр</th>
+            <th>Ваш відгук</th>
         </tr>
         </thead>
         <tbody>
@@ -31,6 +32,30 @@
             <tr>
                 <td>{game.title}</td>
                 <td>{game.genre}</td>
+                <td>
+                    {#if game.review}
+                        <div style="color: green;">
+                            <strong>★ {game.review.rating}/5</strong><br/>
+                            {game.review.text}
+                        </div>
+                    {#else}
+                        <form action="/review" method="POST" style="display: flex; gap: 5px;">
+                            <input type="hidden" name="gameId" value="{game.id}" />
+
+                            <select name="rating">
+                                <option value="5">5</option>
+                                <option value="4">4</option>
+                                <option value="3">3</option>
+                                <option value="2">2</option>
+                                <option value="1">1</option>
+                            </select>
+
+                            <input type="text" name="text" placeholder="Напишіть..." required />
+
+                            <button type="submit">Send</button>
+                        </form>
+                    {/if}
+                </td>
             </tr>
         {/for}
         </tbody>
@@ -38,6 +63,36 @@
 {#else}
     <p>У вашій бібліотеці ще немає ігор.</p>
 {/if}
+
+<hr/>
+
+<h2>Магазин Ігор (Доступні для купівлі)</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Назва</th>
+        <th>Жанр</th>
+        <th>Дія</th>
+    </tr>
+    </thead>
+    <tbody>
+    {#for game in store}
+        <tr>
+            <td>{game.id}</td>
+            <td>{game.title}</td>
+            <td>{game.genre}</td>
+            <td>
+                <form action="/buy" method="POST">
+                    <input type="hidden" name="gameId" value="{game.id}" />
+                    <button type="submit">Купити</button>
+                </form>
+            </td>
+        </tr>
+    {/for}
+    </tbody>
+</table>
 
 </body>
 </html>

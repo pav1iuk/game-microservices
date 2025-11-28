@@ -30,4 +30,14 @@ public interface PlayerProfileClient {
     @GET
     @Path("/{username}/library")
     List<GameDetails> getPlayerLibrary(@PathParam("username") String username);
+
+    // Отримати всі ігри для магазину
+    @GET
+    @Path("/available-games")
+    List<GameDetails> getAllGames();
+
+    // Купити гру
+    @POST
+    @Path("/{username}/buy/{gameId}")
+    void buyGame(@PathParam("username") String username, @PathParam("gameId") Long gameId);
 }
