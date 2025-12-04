@@ -55,6 +55,23 @@ services:
       - "5441:5432"  # Увага: Зовнішній порт 5441
     volumes:
       - players-db-data:/var/lib/postgresql/data
+# 5. Kafka (Message Broker)
+  kafka:
+    image: docker.io/redpandadata/redpanda:v22.2.1
+    container_name: redpanda
+    ports:
+      - "9092:9092"
+    command:
+      - redpanda
+      - start
+      - --smp 1
+      - --memory 1G
+      - --reserve-memory 0M
+      - --overprovisioned
+      - --node-id 0
+      - --check=false
+      - --kafka-addr PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://kafka:29092,OUTSIDE://localhost:9092
 volumes:
   keycloak-db-data:
   games-db-data:

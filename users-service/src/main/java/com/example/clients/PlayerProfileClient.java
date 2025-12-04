@@ -9,6 +9,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import jakarta.ws.rs.DELETE;
 
 import java.util.List;
 
@@ -40,4 +41,8 @@ public interface PlayerProfileClient {
     @POST
     @Path("/{username}/buy/{gameId}")
     void buyGame(@PathParam("username") String username, @PathParam("gameId") Long gameId);
+
+    @DELETE
+    @Path("/{username}/library/{gameId}")
+    void removeGame(@PathParam("username") String username, @PathParam("gameId") Long gameId);
 }

@@ -13,9 +13,13 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
-
+import com.example.events.GamePurchasedEvent;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Iterator;
 
 @Path("/players")
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,7 +36,6 @@ public class PlayerResource {
     @GrpcClient("catalog")
     GameCatalog gameCatalog;
 
-    // 1. Отримати бібліотеку гравця
     @GET
     @Path("/{username}/library")
     public List<GameDetails> getPlayerLibrary(@PathParam("username") String username) {
@@ -41,12 +44,10 @@ public class PlayerResource {
 
         return player.library.stream()
                 .map(ownedGame -> {
-                    // 1. gRPC: Деталі гри
                     var gameInfo = gameCatalog
                             .getGameById(GetGameRequest.newBuilder().setId(ownedGame.gameId).build())
                             .await().indefinitely();
 
-                    // 2. REST: Отримуємо відгук
                     Review myReview = null;
                     try {
                         var reviews = reviewClient.getReviewsForGame(ownedGame.gameId);
@@ -69,7 +70,6 @@ public class PlayerResource {
                 .collect(Collectors.toList());
     }
 
-    // 2. Отримати всі ігри для магазину
     @GET
     @Path("/available-games")
     public List<GameDetails> getAllAvailableGames() {
@@ -81,14 +81,16 @@ public class PlayerResource {
                 .collect(Collectors.toList());
     }
 
-    // 3. Створити гравця
     @POST
     @Transactional
     public void createPlayer(Player player) {
         playerRepository.persist(player);
     }
+    @Inject
+    @Channel("game-purchases") // Назва каналу
+    Emitter<GamePurchasedEvent> purchaseEmitter;
 
-    // 4. Купити гру
+
     @POST
     @Path("/{username}/buy/{gameId}")
     @Transactional
@@ -96,23 +98,30 @@ public class PlayerResource {
         Player player = playerRepository.findByUsername(username);
         if (player != null) {
             boolean alreadyOwned = player.library.stream().anyMatch(g -> g.gameId.equals(gameId));
+
             if (!alreadyOwned) {
+                // 1. Зберігаємо в БД (Синхронно)
                 OwnedGame newGame = new OwnedGame(gameId, player);
                 player.library.add(newGame);
                 playerRepository.persist(player);
+
+                // 2. Відправляємо повідомлення в Kafka (Асинхронно)
+                GamePurchasedEvent event = new GamePurchasedEvent(
+                        username,
+                        gameId,
+                        LocalDateTime.now().toString()
+                );
+                purchaseEmitter.send(event);
+                System.out.println("Event sent to Kafka: " + event.username);
             }
         }
     }
-
-    // 5. ДОДАНИЙ МЕТОД: Додати відгук
-    // Цього методу у вас не вистачало!
     @POST
     @Path("/{username}/games/{gameId}/reviews")
     @Transactional
     public Review addPlayerReview(@PathParam("username") String username,
                                   @PathParam("gameId") Long gameId,
                                   ReviewInput reviewInput) {
-        // Тут ми пересилаємо запит далі на Review Service
         Review review = new Review();
         review.gameId = gameId;
         review.username = username;
@@ -121,9 +130,29 @@ public class PlayerResource {
 
         return reviewClient.addReview(review);
     }
+    @DELETE
+    @Path("/{username}/library/{gameId}")
+    @Transactional
+    public void removeGame(@PathParam("username") String username, @PathParam("gameId") Long gameId) {
+        Player player = playerRepository.findByUsername(username);
+
+        if (player != null) {
+            // Використовуємо ітератор для безпечного видалення елемента під час перебору
+            Iterator<OwnedGame> iterator = player.library.iterator();
+            while (iterator.hasNext()) {
+                OwnedGame game = iterator.next();
+                if (game.gameId.equals(gameId)) {
+                    iterator.remove(); // Видаляє зі списку
+                    break;
+                }
+            }
+            // Hibernate автоматично виконає SQL DELETE при завершенні транзакції
+            // завдяки orphanRemoval=true у класі Player
+            playerRepository.persist(player);
+        }
+    }
 }
 
-// DTO клас
 class GameDetails {
     public Long id;
     public String title;

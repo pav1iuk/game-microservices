@@ -6,7 +6,7 @@
     <style>
         body { font-family: sans-serif; margin: 2em; }
         h1, h2 { color: #333; }
-        table { border-collapse: collapse; width: 600px; } /* Трохи розширив таблицю для форми */
+        table { border-collapse: collapse; width: 600px; }
         th, td { border: 1px solid #ccc; padding: 8px; }
         th { background-color: #f4f4f4; }
         a { float: right; }
@@ -25,6 +25,7 @@
             <th>Назва гри</th>
             <th>Жанр</th>
             <th>Ваш відгук</th>
+            <th>Дії</th>
         </tr>
         </thead>
         <tbody>
@@ -55,6 +56,14 @@
                             <button type="submit">Send</button>
                         </form>
                     {/if}
+                </td>
+                <td style="text-align: center;">
+                    <form action="/remove" method="POST" onsubmit="return confirm('Ви впевнені, що хочете видалити цю гру?');">
+                        <input type="hidden" name="gameId" value="{game.id}" />
+                        <button type="submit" style="background-color: #ff4444; color: white; border: none; padding: 5px 10px; cursor: pointer;">
+                            Видалити
+                        </button>
+                    </form>
                 </td>
             </tr>
         {/for}

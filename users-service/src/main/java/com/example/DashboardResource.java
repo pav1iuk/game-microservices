@@ -69,12 +69,20 @@ public class DashboardResource {
 
         String username = securityContext.getUserPrincipal().getName();
 
-        // Створюємо об'єкт з даними відгуку
         ReviewInput input = new ReviewInput(rating, text);
 
-        // Відправляємо на player-profile-service
-        // (метод addPlayerReview ми додали в інтерфейс PlayerProfileClient раніше)
         playerProfileClient.addPlayerReview(username, gameId, input);
+
+        return Response.seeOther(URI.create("/")).build();
+    }
+
+    @POST // HTML форми підтримують тільки GET і POST, тому використовуємо POST для виклику дії
+    @Path("/remove")
+    public Response removeGame(@FormParam("gameId") Long gameId) {
+        String username = securityContext.getUserPrincipal().getName();
+
+        // Викликаємо бекенд для видалення
+        playerProfileClient.removeGame(username, gameId);
 
         // Перезавантажуємо сторінку
         return Response.seeOther(URI.create("/")).build();
